@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>食安法檢舉懶人包｜一鍵產出檢舉書 PDF</title>
+<meta name="description" content="免費工具：填寫被檢舉人資料、勾選違規事項、上傳證據照片，一鍵產出符合《食品安全衛生檢舉案件處理及獎勵辦法》的檢舉書 PDF。所有資料僅在瀏覽器本地處理。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;700;900&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+:root{
+  --paper:#FFFFFF;
+  --bg:#EFF1F0;
+  --ink:#22282E;
+  --ink-soft:#5A636B;
+  --navy:#1E3A52;
+  --seal:#A62C21;
+  --seal-soft:#FBEFEC;
+  --line:#D8DCDF;
+  --gold:#8A6D3B;
+  --radius:6px;
+  --serif:'Noto Serif TC', 'PMingLiU', serif;
+  --sans:'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--sans);
+  background:var(--bg);
+  background-image:repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(30,58,82,.045) 39px, rgba(30,58,82,.045) 40px);
+  color:var(--ink);
+  line-height:1.75;
+  font-size:16px;
+}
+a{color:var(--navy)}
+.wrap{max-width:760px;margin:0 auto;padding:0 16px 120px}
+
+/* ── Header ── */
+header{padding:52px 0 34px;text-align:center}
+.seal-mark{
+  width:76px;height:76px;margin:0 auto 18px;
+  border:3px solid var(--seal);border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--serif);font-weight:900;font-size:22px;line-height:1.25;
+  color:var(--seal);letter-spacing:2px;
+  transform:rotate(-4deg);
+  box-shadow:inset 0 0 0 1.5px var(--paper), inset 0 0 0 3px var(--seal);
+  background:radial-gradient(circle at 30% 30%, rgba(166,44,33,.06), transparent 70%);
+  user-select:none;
+}
+header h1{
+  font-family:var(--serif);font-weight:900;font-size:clamp(28px,6vw,40px);
+  color:var(--navy);letter-spacing:6px;
+}
+header .sub{color:var(--ink-soft);margin-top:8px;font-size:15px;letter-spacing:1px}
+.privacy-band{
+  margin:22px auto 0;max-width:560px;
+  background:var(--seal-soft);border:1px solid #EAD2CD;border-radius:var(--radius);
+  padding:10px 16px;font-size:14px;color:#7A2A21;text-align:left;
+}
+.privacy-band b{color:var(--seal)}
+
+/* ── Cards / Sections ── */
+.card{
+  background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);
+  padding:28px 26px;margin-bottom:22px;
+  box-shadow:0 1px 3px rgba(30,58,82,.06);
+}
+.sec-head{display:flex;align-items:baseline;gap:12px;margin-bottom:6px}
+.sec-num{
+  font-family:var(--serif);font-weight:900;font-size:22px;color:var(--seal);
+  letter-spacing:2px;flex-shrink:0;
+}
+.sec-title{font-family:var(--serif);font-weight:700;font-size:20px;color:var(--navy);letter-spacing:2px}
+.sec-note{font-size:13.5px;color:var(--ink-soft);margin-bottom:18px;padding-left:2px}
+.sec-note .law{color:var(--gold)}
+
+/* ── Form ── */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:560px){.grid{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:5px}
+.field.full{grid-column:1/-1}
+label{font-size:14px;font-weight:700;color:var(--navy);letter-spacing:.5px}
+label .opt{font-weight:400;color:var(--ink-soft);font-size:12.5px}
+label .req{color:var(--seal);font-size:12.5px}
+input[type=text],input[type=tel],select,textarea{
+  font-family:var(--sans);font-size:15.5px;color:var(--ink);
+  border:1px solid var(--line);border-radius:4px;padding:10px 12px;
+  background:#FCFCFB;width:100%;
+}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--navy);outline-offset:1px;background:#fff}
+textarea{resize:vertical;min-height:110px}
+.hint{font-size:12.5px;color:var(--ink-soft)}
+
+/* ── Checklist ── */
+.vio-list{display:flex;flex-direction:column;gap:10px}
+.vio-item{
+  display:flex;gap:12px;align-items:flex-start;
+  border:1px solid var(--line);border-radius:4px;padding:12px 14px;cursor:pointer;
+  transition:border-color .15s, background .15s;background:#FCFCFB;
+}
+.vio-item:hover{border-color:var(--navy)}
+.vio-item.checked{border-color:var(--seal);background:var(--seal-soft)}
+.vio-item input{margin-top:5px;accent-color:var(--seal);width:17px;height:17px;flex-shrink:0}
+.vio-txt{font-size:15px;font-weight:500}
+.vio-law{display:block;font-size:12.5px;color:var(--gold);margin-top:2px}
+.vio-badge{
+  display:inline-block;font-size:11.5px;color:#fff;background:var(--seal);
+  border-radius:3px;padding:0 6px;margin-left:6px;vertical-align:1px;letter-spacing:1px;
+}
+
+/* ── Upload ── */
+.dropzone{
+  border:2px dashed var(--line);border-radius:var(--radius);
+  padding:30px 16px;text-align:center;color:var(--ink-soft);cursor:pointer;
+  transition:border-color .15s,background .15s;background:#FCFCFB;
+}
+.dropzone:hover,.dropzone.drag{border-color:var(--seal);background:var(--seal-soft);color:var(--seal)}
+.dropzone b{color:var(--navy)}
+#fileInput{display:none}
+.thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:12px;margin-top:16px}
+.thumb{position:relative;border:1px solid var(--line);border-radius:4px;overflow:hidden;background:#fff}
+.thumb img{width:100%;height:110px;object-fit:cover;display:block}
+.thumb .tag{
+  position:absolute;left:0;top:0;background:var(--navy);color:#fff;
+  font-size:11px;padding:1px 7px;border-bottom-right-radius:4px;letter-spacing:1px;
+}
+.thumb button{
+  position:absolute;right:4px;top:4px;width:22px;height:22px;border:none;border-radius:50%;
+  background:rgba(34,40,46,.75);color:#fff;font-size:13px;line-height:1;cursor:pointer;
+}
+.thumb button:hover{background:var(--seal)}
+
+/* ── Article 9 note ── */
+.law-note{
+  margin-top:20px;border-left:4px solid var(--seal);
+  background:var(--seal-soft);border-radius:0 4px 4px 0;
+  padding:14px 16px;font-size:14px;
+}
+.law-note h4{font-family:var(--serif);color:var(--seal);font-size:15px;letter-spacing:1px;margin-bottom:6px}
+.law-note p{color:#5C3A34}
+
+/* ── Reward box ── */
+.reward{font-size:14px;color:var(--ink-soft);border:1px dashed var(--gold);border-radius:4px;padding:12px 16px;margin-top:16px}
+.reward b{color:var(--gold)}
+
+/* ── Action bar ── */
+.actionbar{
+  position:fixed;left:0;right:0;bottom:0;z-index:50;
+  background:rgba(255,255,255,.96);backdrop-filter:blur(6px);
+  border-top:1px solid var(--line);
+  padding:12px 16px;
+}
+.actionbar .inner{max-width:760px;margin:0 auto;display:flex;gap:12px;flex-wrap:wrap}
+.btn{
+  font-family:var(--sans);font-weight:700;font-size:15.5px;letter-spacing:1px;
+  border-radius:5px;padding:12px 22px;cursor:pointer;border:1px solid transparent;
+  transition:transform .1s, box-shadow .15s;flex:1;min-width:150px;
+}
+.btn:active{transform:translateY(1px)}
+.btn-primary{background:var(--seal);color:#fff}
+.btn-primary:hover{box-shadow:0 3px 10px rgba(166,44,33,.35)}
+.btn-ghost{background:#fff;color:var(--navy);border-color:var(--navy)}
+.btn-ghost:hover{background:#F2F5F8}
+.btn:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
+
+/* ── Preview sheet ── */
+#previewWrap{display:none;margin-top:8px}
+#previewWrap.show{display:block}
+.preview-tools{display:flex;gap:12px;flex-wrap:wrap;margin:14px 0 18px}
+.sheet{
+  background:#fff;border:1px solid var(--line);
+  padding:44px 46px;box-shadow:0 2px 10px rgba(30,58,82,.08);
+  font-size:14.5px;line-height:1.9;color:#111;
+  position:relative;
+}
+@media(max-width:560px){.sheet{padding:28px 20px}}
+.sheet h2{
+  font-family:var(--serif);font-weight:900;font-size:24px;color:#111;
+  text-align:center;letter-spacing:10px;margin-bottom:4px;
+}
+.sheet .sheet-sub{text-align:center;font-size:12.5px;color:#555;margin-bottom:22px}
+.sheet .stamp{
+  position:absolute;top:34px;right:38px;width:58px;height:58px;
+  border:2.5px solid var(--seal);border-radius:8px;color:var(--seal);
+  font-family:var(--serif);font-weight:900;font-size:16px;line-height:1.3;
+  display:flex;align-items:center;justify-content:center;transform:rotate(6deg);
+  letter-spacing:1px;opacity:.9;
+}
+.sheet h3{
+  font-family:var(--serif);font-weight:700;font-size:17px;color:#111;
+  border-bottom:1.5px solid #111;padding-bottom:4px;margin:22px 0 10px;letter-spacing:2px;
+}
+.sheet table{width:100%;border-collapse:collapse;margin-bottom:6px}
+.sheet td{border:1px solid #999;padding:7px 11px;vertical-align:top}
+.sheet td.k{width:132px;background:#F4F4F2;font-weight:700;white-space:nowrap}
+.sheet ol{padding-left:24px}
+.sheet ol li{margin-bottom:8px}
+.sheet .lawref{color:#7A5C28;font-size:13px}
+.sheet .free-desc{border:1px solid #999;padding:10px 12px;min-height:60px;white-space:pre-wrap}
+.sheet .ev{margin:14px 0;page-break-inside:avoid;break-inside:avoid}
+.sheet .ev img{max-width:100%;max-height:460px;display:block;border:1px solid #ccc;margin-top:4px}
+.sheet .ev .cap{font-weight:700}
+.sheet .note9{border:1px solid #999;background:#F7F1EF;padding:10px 14px;font-size:13px;margin-top:8px}
+.sheet .sig{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-top:30px;font-size:14.5px}
+.empty-mark{color:#888}
+
+footer{margin-top:40px;text-align:center;font-size:13px;color:var(--ink-soft);padding-bottom:8px}
+footer .line1919{font-family:var(--serif);font-size:16px;color:var(--seal);font-weight:700;letter-spacing:2px}
+
+/* ── Print：只印檢舉書 ── */
+@media print{
+  body{background:#fff}
+  header,.card,.actionbar,.preview-tools,footer,.privacy-band{display:none !important}
+  .wrap{max-width:none;padding:0}
+  #previewWrap{display:block !important}
+  .sheet{border:none;box-shadow:none;padding:0}
+  .sheet .ev{page-break-inside:avoid}
+}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="seal-mark">檢舉<br>專用</div>
+  <h1>食安法檢舉懶人包</h1>
+  <p class="sub">依《食品安全衛生檢舉案件處理及獎勵辦法》第二條格式 ── 填表・附證・一鍵產出檢舉書 PDF</p>
+  <div class="privacy-band">
+    <b>🔒 隱私聲明：</b>本頁所有資料（含身分證字號與照片）僅在您的瀏覽器內處理與產出 PDF，<b>不會上傳到任何伺服器</b>。關閉頁面後資料即消失。
+  </div>
+</header>
+
+<!-- 壹 檢舉人 -->
+<section class="card">
+  <div class="sec-head"><span class="sec-num">壹、</span><span class="sec-title">檢舉人資料</span></div>
+  <p class="sec-note">依辦法第二條第一項第一款，檢舉時應敘明檢舉人姓名、國民身分證統一編號、聯絡方式及地址。</p>
+  <div class="grid">
+    <div class="field"><label for="rName">姓名 <span class="req">＊必填</span></label><input type="text" id="rName" autocomplete="name"></div>
+    <div class="field"><label for="rId">國民身分證統一編號 <span class="req">＊必填</span></label><input type="text" id="rId" maxlength="10" placeholder="A123456789"></div>
+    <div class="field"><label for="rPhone">聯絡電話 <span class="req">＊必填</span></label><input type="tel" id="rPhone" autocomplete="tel"></div>
+    <div class="field"><label for="rMail">電子郵件 <span class="opt">（選填）</span></label><input type="text" id="rMail" autocomplete="email"></div>
+    <div class="field full"><label for="rAddr">聯絡地址 <span class="req">＊必填</span></label><input type="text" id="rAddr" autocomplete="street-address"></div>
+  </div>
+  <div class="law-note">
+    <h4>您的身分受法律保密 ── 辦法第九條</h4>
+    <p>「主管機關或其他機關對於檢舉人之姓名、年齡、住址、文書、圖畫、消息、相貌、身分資料或其他足資辨別檢舉人之物品，應予保密；如有洩密情事，應依刑法或其他法律處罰或懲處。」</p>
+  </div>
+</section>
+
+<!-- 貳 被檢舉人 -->
+<section class="card">
+  <div class="sec-head"><span class="sec-num">貳、</span><span class="sec-title">被檢舉人資料</span></div>
+  <p class="sec-note">依辦法第二條第二項，被檢舉人資料<b>無法查明者得免敘明</b>──知道多少填多少即可，帳號、電話都是可供調查的線索。</p>
+  <div class="grid">
+    <div class="field"><label for="tName">姓名／商號名稱 <span class="opt">（選填）</span></label><input type="text" id="tName"></div>
+    <div class="field"><label for="tPhone">手機號碼 <span class="opt">（選填）</span></label><input type="tel" id="tPhone"></div>
+    <div class="field"><label for="tFb">Facebook 帳號／粉專網址 <span class="opt">（選填）</span></label><input type="text" id="tFb" placeholder="帳號名稱或貼文網址"></div>
+    <div class="field"><label for="tLine">LINE 帳號／ID <span class="opt">（選填）</span></label><input type="text" id="tLine"></div>
+    <div class="field full"><label for="tAddr">營業地址／販售或面交地點 <span class="opt">（選填，無固定地點請描述交易方式）</span></label><input type="text" id="tAddr" placeholder="例：無固定營業地點，透過 Facebook 貼文後電話約定面交"></div>
+    <div class="field full">
+      <label for="tCity">違規行為發生縣市（決定受理之衛生局） <span class="opt">（選填）</span></label>
+      <select id="tCity">
+        <option value="">── 不確定／由 1919 專線分派 ──</option>
+        <option>臺北市</option><option>新北市</option><option>桃園市</option><option>臺中市</option>
+        <option>臺南市</option><option>高雄市</option><option>基隆市</option><option>新竹市</option>
+        <option>新竹縣</option><option>苗栗縣</option><option>彰化縣</option><option>南投縣</option>
+        <option>雲林縣</option><option>嘉義市</option><option>嘉義縣</option><option>屏東縣</option>
+        <option>宜蘭縣</option><option>花蓮縣</option><option>臺東縣</option><option>澎湖縣</option>
+        <option>金門縣</option><option>連江縣</option>
+      </select>
+    </div>
+  </div>
+</section>
+
+<!-- 參 違規事項 -->
+<section class="card">
+  <div class="sec-head"><span class="sec-num">參、</span><span class="sec-title">涉嫌違規事項</span></div>
+  <p class="sec-note">勾選符合的項目（可複選），法條將自動列入檢舉書。標<span class="vio-badge">重大</span>者依辦法第四條，檢舉獎金為罰鍰實收金額<b>至少 50%</b>；其餘至少 20%。</p>
+  <div class="vio-list" id="vioList"></div>
+  <div class="field full" style="margin-top:16px">
+    <label for="vioDesc">具體事實描述 <span class="opt">（時間、地點、販售方式、您如何發現……越具體越好）</span></label>
+    <textarea id="vioDesc" placeholder="例：本人於 115 年 7 月間，在 Facebook 見被檢舉人張貼販售真空包裝生鮮魚貨之貼文，商品包裝上完全無品名、有效日期、原產地等標示，且以電話約定面交方式交易，無固定營業地點……"></textarea>
+  </div>
+  <div class="reward">💰 <b>檢舉獎金</b>（辦法第四、五條）：查獲屬實可領罰鍰實收金額 20%～50% 以上；重大案件另可加發 <b>10 萬～200 萬元</b>，內部員工檢舉上限提高至 <b>400 萬元</b>。</div>
+</section>
+
+<!-- 肆 證據 -->
+<section class="card">
+  <div class="sec-head"><span class="sec-num">肆、</span><span class="sec-title">證據照片／截圖</span></div>
+  <p class="sec-note">商品照、包裝標示（或無標示）照、FB／LINE 貼文與對話截圖、交易紀錄等。圖片會依「附件一、附件二…」編號附於檢舉書後。</p>
+  <div class="dropzone" id="dropzone" role="button" tabindex="0" aria-label="上傳證據圖片">
+    <b>點擊選擇</b> 或將圖片拖曳到此處<br><span class="hint">支援 JPG／PNG，可一次多張（建議 20 張以內）</span>
+  </div>
+  <input type="file" id="fileInput" accept="image/*" multiple>
+  <div class="thumbs" id="thumbs"></div>
+</section>
+
+<!-- 檢舉書預覽 -->
+<div id="previewWrap">
+  <div class="sec-head" style="margin:10px 0 4px"><span class="sec-num">▣</span><span class="sec-title">檢舉書預覽</span></div>
+  <div class="preview-tools">
+    <button class="btn btn-primary" id="btnPdf">⬇ 下載 PDF（一鍵）</button>
+    <button class="btn btn-ghost" id="btnPrint">🖨 列印／另存 PDF（文字可選取）</button>
+  </div>
+  <div class="sheet" id="sheet"></div>
+</div>
+
+<footer>
+  <p class="line1919">全國食品安全專線 1919（按 1 食品檢舉）</p>
+  <p>法規依據：<a href="https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=L0040011" target="_blank" rel="noopener">食品安全衛生檢舉案件處理及獎勵辦法</a>｜<a href="https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=L0040001" target="_blank" rel="noopener">食品安全衛生管理法</a></p>
+  <p>本工具僅協助整理檢舉文件，不構成法律意見；檢舉請確認內容屬實，虛偽檢舉須自負法律責任。</p>
+</footer>
+
+</div><!-- /wrap -->
+
+<div class="actionbar">
+  <div class="inner">
+    <button class="btn btn-primary" id="btnGen">📄 產生檢舉書</button>
+  </div>
+</div>
+
+<script>
+/* ───────── 違規清單資料 ───────── */
+const VIOLATIONS = [
+  {id:'v1', txt:'未辦理食品業者登錄即製造、加工或販售食品（含網路、面交販售）', law:'食安法第8條第3項；依第47條處新臺幣3萬～300萬元罰鍰', major:false},
+  {id:'v2', txt:'包裝食品未標示品名、有效日期、原產地、負責廠商等應標示事項', law:'食安法第22條；依第47條處3萬～300萬元罰鍰', major:false},
+  {id:'v3', txt:'散裝食品未依規定標示品名、原產地（含水產品捕撈方式等）', law:'食安法第25條；依第47條處3萬～300萬元罰鍰', major:false},
+  {id:'v4', txt:'販售腐敗、變質或未成熟而有害人體健康之食品', law:'食安法第15條第1項第1款；依第44條處6萬～2億元罰鍰', major:false},
+  {id:'v5', txt:'攙偽或假冒（魚種標錯、以劣品充好品等）', law:'食安法第15條第1項第7款；依第49條可處刑事責任、第44條處6萬～2億元罰鍰', major:true},
+  {id:'v6', txt:'販售逾有效日期之食品', law:'食安法第15條第1項第8款；依第44條處6萬～2億元罰鍰', major:true},
+  {id:'v7', txt:'添加未經中央主管機關許可之添加物（如甲醛、孔雀綠、過量漂白劑等）', law:'食安法第15條第1項第10款、第18條；依第49條可處刑事責任、第44條處6萬～2億元罰鍰', major:true},
+  {id:'v8', txt:'標示、宣傳或廣告不實、誇張或易生誤解（如謊稱現撈、原產地不實）', law:'食安法第28條第1項；依第45條處4萬～400萬元罰鍰', major:false},
+  {id:'v9', txt:'製造、貯存或販售場所不符食品良好衛生規範（GHP）', law:'食安法第8條第1項；限期改正未改正者依第44條處6萬～2億元罰鍰', major:false},
+];
+
+const vioList = document.getElementById('vioList');
+VIOLATIONS.forEach(v=>{
+  const el = document.createElement('label');
+  el.className = 'vio-item';
+  el.innerHTML = `<input type="checkbox" id="${v.id}">
+    <span class="vio-txt">${v.txt}${v.major?'<span class="vio-badge">重大</span>':''}
+      <span class="vio-law">${v.law}</span>
+    </span>`;
+  el.querySelector('input').addEventListener('change', e=>{
+    el.classList.toggle('checked', e.target.checked);
+  });
+  vioList.appendChild(el);
+});
+
+/* ───────── 圖片上傳（本地處理＋壓縮） ───────── */
+const CNUM = ['一','二','三','四','五','六','七','八','九','十','十一','十二','十三','十四','十五','十六','十七','十八','十九','二十'];
+const cnum = i => CNUM[i] || String(i+1);
+let evidences = []; // {dataUrl, name}
+
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('fileInput');
+const thumbs = document.getElementById('thumbs');
+
+dropzone.addEventListener('click', ()=>fileInput.click());
+dropzone.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){e.preventDefault();fileInput.click();} });
+['dragover','dragenter'].forEach(ev=>dropzone.addEventListener(ev, e=>{e.preventDefault();dropzone.classList.add('drag');}));
+['dragleave','drop'].forEach(ev=>dropzone.addEventListener(ev, e=>{e.preventDefault();dropzone.classList.remove('drag');}));
+dropzone.addEventListener('drop', e=>handleFiles(e.dataTransfer.files));
+fileInput.addEventListener('change', e=>{handleFiles(e.target.files); fileInput.value='';});
+
+function handleFiles(files){
+  [...files].forEach(f=>{
+    if(!f.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = ev=>{
+      compressImage(ev.target.result, dataUrl=>{
+        evidences.push({dataUrl, name:f.name});
+        renderThumbs();
+      });
+    };
+    reader.readAsDataURL(f);
+  });
+}
+function compressImage(src, cb){
+  const img = new Image();
+  img.onload = ()=>{
+    const MAX = 1400;
+    let {width:w, height:h} = img;
+    if(Math.max(w,h) > MAX){ const s = MAX/Math.max(w,h); w=Math.round(w*s); h=Math.round(h*s); }
+    const c = document.createElement('canvas'); c.width=w; c.height=h;
+    c.getContext('2d').drawImage(img,0,0,w,h);
+    cb(c.toDataURL('image/jpeg', .82));
+  };
+  img.onerror = ()=>cb(src);
+  img.src = src;
+}
+function renderThumbs(){
+  thumbs.innerHTML = '';
+  evidences.forEach((e,i)=>{
+    const d = document.createElement('div');
+    d.className = 'thumb';
+    d.innerHTML = `<span class="tag">附件${cnum(i)}</span><img src="${e.dataUrl}" alt="附件${cnum(i)}"><button type="button" aria-label="刪除附件${cnum(i)}">✕</button>`;
+    d.querySelector('button').addEventListener('click', ()=>{ evidences.splice(i,1); renderThumbs(); });
+    thumbs.appendChild(d);
+  });
+}
+
+/* ───────── 產生檢舉書 ───────── */
+const $ = id => document.getElementById(id).value.trim();
+const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const show = s => s ? esc(s) : '<span class="empty-mark">（無法查明，免敘明）</span>';
+
+document.getElementById('btnGen').addEventListener('click', ()=>{
+  // 必填驗證
+  const missing = [];
+  if(!$('rName')) missing.push('檢舉人姓名');
+  if(!$('rId')) missing.push('身分證字號');
+  if(!$('rPhone')) missing.push('聯絡電話');
+  if(!$('rAddr')) missing.push('聯絡地址');
+  if(missing.length){ alert('請填寫必填欄位：' + missing.join('、')); return; }
+  if(!/^[A-Za-z][0-9]{9}$/.test($('rId'))){
+    if(!confirm('身分證字號格式看起來不正確（應為 1 個英文字母＋9 碼數字），仍要繼續產生檢舉書嗎？')) return;
+  }
+  const checked = VIOLATIONS.filter(v=>document.getElementById(v.id).checked);
+  if(!checked.length && !$('vioDesc')){
+    alert('請至少勾選一項違規事項，或填寫具體事實描述。'); return;
+  }
+
+  const city = $('tCity');
+  const agency = city ? city + '政府衛生局' : '衛生福利部食品藥物管理署／違規行為地衛生局';
+  const today = new Date();
+  const rocDate = `中華民國 ${today.getFullYear()-1911} 年 ${today.getMonth()+1} 月 ${today.getDate()} 日`;
+
+  let html = `
+  <div class="stamp">檢舉<br>專用</div>
+  <h2>食品安全衛生檢舉書</h2>
+  <p class="sheet-sub">依《食品安全衛生檢舉案件處理及獎勵辦法》第二條提出</p>
+
+  <table><tr><td class="k">受文機關</td><td>${esc(agency)}</td></tr></table>
+
+  <h3>壹、檢舉人資料</h3>
+  <table>
+    <tr><td class="k">姓　　名</td><td>${esc($('rName'))}</td></tr>
+    <tr><td class="k">身分證統一編號</td><td>${esc($('rId'))}</td></tr>
+    <tr><td class="k">聯絡電話</td><td>${esc($('rPhone'))}${$('rMail')?'　／　E-mail：'+esc($('rMail')):''}</td></tr>
+    <tr><td class="k">聯絡地址</td><td>${esc($('rAddr'))}</td></tr>
+  </table>
+
+  <h3>貳、被檢舉人資料</h3>
+  <table>
+    <tr><td class="k">姓名／商號</td><td>${show($('tName'))}</td></tr>
+    <tr><td class="k">手機號碼</td><td>${show($('tPhone'))}</td></tr>
+    <tr><td class="k">Facebook</td><td>${show($('tFb'))}</td></tr>
+    <tr><td class="k">LINE 帳號</td><td>${show($('tLine'))}</td></tr>
+    <tr><td class="k">營業地址／<br>販售方式</td><td>${show($('tAddr'))}</td></tr>
+  </table>
+
+  <h3>參、涉嫌違反食品安全衛生管理法之具體事項</h3>`;
+
+  if(checked.length){
+    html += `<ol>` + checked.map(v=>
+      `<li>${esc(v.txt)}${v.major?'（違規情節重大）':''}<br><span class="lawref">法條依據：${esc(v.law)}</span></li>`
+    ).join('') + `</ol>`;
+  }
+  if($('vioDesc')){
+    html += `<p style="font-weight:700;margin-top:8px">具體事實描述：</p><div class="free-desc">${esc($('vioDesc'))}</div>`;
+  }
+
+  html += `<h3>肆、證據清單</h3>`;
+  if(evidences.length){
+    html += `<p>檢附證據照片／截圖共 ${evidences.length} 件，如附件：</p>`;
+    evidences.forEach((e,i)=>{
+      html += `<div class="ev"><span class="cap">附件${cnum(i)}</span>（${esc(e.name)}）<img src="${e.dataUrl}" alt="附件${cnum(i)}"></div>`;
+    });
+  } else {
+    html += `<p class="empty-mark">（未檢附照片，將於受理機關要求時補充）</p>`;
+  }
+
+  html += `
+  <h3>伍、附註</h3>
+  <div class="note9"><b>檢舉人身分保密（辦法第九條）：</b>主管機關或其他機關對於檢舉人之姓名、年齡、住址、文書、圖畫、消息、相貌、身分資料或其他足資辨別檢舉人之物品，應予保密；如有洩密情事，應依刑法或其他法律處罰或懲處。</div>
+  <div class="note9" style="margin-top:8px"><b>處理時限（辦法第三條）：</b>主管機關對檢舉應迅速確實處理，並將處理情形於三十日內通知檢舉人。<br><b>檢舉獎金（辦法第四條）：</b>因檢舉而查獲違規者，得發給檢舉人至少罰鍰實收金額 20% 之獎金；違反食安法第15條第1項第7、8、10款者至少 50%。</div>
+
+  <p style="margin-top:22px">上列檢舉內容均屬實，此致<br><b style="font-size:16px">${esc(agency)}</b></p>
+  <div class="sig">
+    <span>檢舉人（簽章）：＿＿＿＿＿＿＿＿＿＿</span>
+    <span>${rocDate}</span>
+  </div>`;
+
+  document.getElementById('sheet').innerHTML = html;
+  const wrap = document.getElementById('previewWrap');
+  wrap.classList.add('show');
+  wrap.scrollIntoView({behavior:'smooth'});
+});
+
+/* ───────── 下載 PDF / 列印 ───────── */
+document.getElementById('btnPdf').addEventListener('click', ()=>{
+  const btn = document.getElementById('btnPdf');
+  btn.disabled = true; btn.textContent = '產生中，請稍候…';
+  const name = ($('rName')||'檢舉人');
+  html2pdf().set({
+    margin:[10,10,12,10],
+    filename:`食安法檢舉書_${name}_${Date.now()}.pdf`,
+    image:{type:'jpeg', quality:.9},
+    html2canvas:{scale:2, useCORS:true},
+    jsPDF:{unit:'mm', format:'a4', orientation:'portrait'},
+    pagebreak:{mode:['css','legacy']}
+  }).from(document.getElementById('sheet')).save().then(()=>{
+    btn.disabled = false; btn.textContent = '⬇ 下載 PDF（一鍵）';
+  }).catch(()=>{
+    btn.disabled = false; btn.textContent = '⬇ 下載 PDF（一鍵）';
+    alert('PDF 產生失敗，請改用「列印／另存 PDF」。');
+  });
+});
+document.getElementById('btnPrint').addEventListener('click', ()=>window.print());
+</script>
+</body>
+</html>
