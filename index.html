@@ -142,6 +142,19 @@ textarea{resize:vertical;min-height:110px}
 .law-note h4{font-family:var(--serif);color:var(--seal);font-size:15px;letter-spacing:1px;margin-bottom:6px}
 .law-note p{color:#5C3A34}
 
+/* ── Channels ── */
+.ch-national{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+@media(max-width:560px){.ch-national{grid-template-columns:1fr}}
+.ch-item{border:1px solid var(--line);border-left:4px solid var(--seal);border-radius:0 4px 4px 0;padding:12px 14px;font-size:14px;background:#FCFCFB}
+.ch-item b{color:var(--navy)}
+.ch-table{width:100%;border-collapse:collapse;font-size:14px}
+.ch-table th{background:var(--navy);color:#fff;padding:8px 10px;text-align:left;font-weight:700;letter-spacing:1px}
+.ch-table td{border:1px solid var(--line);padding:7px 10px}
+.ch-table tr:nth-child(even) td{background:#FAFAF9}
+.ch-table tr.hl td{background:var(--seal-soft);border-color:#EAD2CD}
+.ch-table a{color:var(--navy)}
+.ch-table .alt{font-size:12px;color:var(--ink-soft);white-space:nowrap}
+
 /* ── Reward box ── */
 .reward{font-size:14px;color:var(--ink-soft);border:1px dashed var(--gold);border-radius:4px;padding:12px 16px;margin-top:16px}
 .reward b{color:var(--gold)}
@@ -299,6 +312,23 @@ footer .line1919{font-family:var(--serif);font-size:16px;color:var(--seal);font-
   <div class="thumbs" id="thumbs"></div>
 </section>
 
+<!-- 伍 全國檢舉管道（僅頁面顯示，不列入檢舉書） -->
+<section class="card" id="channelCard">
+  <div class="sec-head"><span class="sec-num">伍、</span><span class="sec-title">全國檢舉管道速查</span></div>
+  <p class="sec-note">產出 PDF 後，可透過以下管道送出檢舉。<b>本區僅供查詢，不會出現在檢舉書上。</b></p>
+
+  <div class="ch-national">
+    <div class="ch-item"><b>☎ 1919 全國食品安全專線</b><br>撥打後按「1」進入食品檢舉，全國適用、免準備地址。</div>
+    <div class="ch-item"><b>✉ 食藥署為民服務信箱</b><br><a href="http://faq.fda.gov.tw/" target="_blank" rel="noopener">faq.fda.gov.tw</a>（線上填單，中央受理後轉分派）</div>
+  </div>
+
+  <table class="ch-table" id="chTable">
+    <thead><tr><th>縣市</th><th>衛生局官網</th><th>市（縣）長信箱</th></tr></thead>
+    <tbody></tbody>
+  </table>
+  <p class="hint" style="margin-top:10px">※ 衛生局網址依食藥署「各縣市衛生局網站」名單整理；機關網址如有異動，請改用「搜尋」備援連結。上方「貳」區選擇縣市後，對應列會自動標亮。</p>
+</section>
+
 <!-- 檢舉書預覽 -->
 <div id="previewWrap">
   <div class="sec-head" style="margin:10px 0 4px"><span class="sec-num">▣</span><span class="sec-title">檢舉書預覽</span></div>
@@ -349,6 +379,50 @@ VIOLATIONS.forEach(v=>{
     el.classList.toggle('checked', e.target.checked);
   });
   vioList.appendChild(el);
+});
+
+/* ───────── 全國檢舉管道資料（依食藥署「各縣市衛生局網站」名單） ───────── */
+const AGENCIES = [
+  {city:'臺北市', url:'https://health.gov.taipei'},
+  {city:'新北市', url:'https://www.health.ntpc.gov.tw'},
+  {city:'桃園市', url:'https://dph.tycg.gov.tw'},
+  {city:'臺中市', url:'https://www.health.taichung.gov.tw'},
+  {city:'臺南市', url:'https://health.tainan.gov.tw'},
+  {city:'高雄市', url:'https://khd.kcg.gov.tw'},
+  {city:'基隆市', url:'https://www.klchb.gov.tw'},
+  {city:'新竹市', url:'https://www.hcchb.gov.tw'},
+  {city:'新竹縣', url:'https://www.hcshb.gov.tw'},
+  {city:'苗栗縣', url:'https://www.mlshb.gov.tw'},
+  {city:'彰化縣', url:'https://www.chshb.gov.tw'},
+  {city:'南投縣', url:'https://www.ntshb.gov.tw'},
+  {city:'雲林縣', url:'https://www.ylshb.gov.tw'},
+  {city:'嘉義市', url:'https://www.cichb.gov.tw'},
+  {city:'嘉義縣', url:'https://www.cyshb.gov.tw'},
+  {city:'屏東縣', url:'https://www.ptshb.gov.tw'},
+  {city:'宜蘭縣', url:'https://www.ilshb.gov.tw'},
+  {city:'花蓮縣', url:'https://www.hlshb.gov.tw'},
+  {city:'臺東縣', url:'https://www.ttshb.gov.tw'},
+  {city:'澎湖縣', url:'https://www.phchb.gov.tw'},
+  {city:'金門縣', url:'https://phb.kinmen.gov.tw'},
+  {city:'連江縣', url:'https://www.matsuhb.gov.tw'},
+];
+const gs = q => 'https://www.google.com/search?q=' + encodeURIComponent(q);
+const chBody = document.querySelector('#chTable tbody');
+AGENCIES.forEach(a=>{
+  const mayor = a.city.endsWith('縣') ? '縣長信箱' : '市長信箱';
+  const tr = document.createElement('tr');
+  tr.dataset.city = a.city;
+  tr.innerHTML = `<td><b>${a.city}</b></td>
+    <td><a href="${a.url}" target="_blank" rel="noopener">${a.city}衛生局</a>　<a class="alt" href="${gs(a.city+'衛生局 食品檢舉')}" target="_blank" rel="noopener">（搜尋）</a></td>
+    <td><a href="${gs(a.city+mayor)}" target="_blank" rel="noopener">${mayor}（搜尋）</a></td>`;
+  chBody.appendChild(tr);
+});
+document.getElementById('tCity').addEventListener('change', e=>{
+  document.querySelectorAll('#chTable tbody tr').forEach(tr=>{
+    tr.classList.toggle('hl', tr.dataset.city === e.target.value);
+  });
+  const hl = document.querySelector('#chTable tr.hl');
+  if(hl) hl.scrollIntoView({behavior:'smooth', block:'center'});
 });
 
 /* ───────── 圖片上傳（本地處理＋壓縮） ───────── */
@@ -482,8 +556,7 @@ document.getElementById('btnGen').addEventListener('click', ()=>{
 
   <p style="margin-top:22px">上列檢舉內容均屬實，此致<br><b style="font-size:16px">${esc(agency)}</b></p>
   <div class="sig">
-    <span>檢舉人（簽章）：＿＿＿＿＿＿＿＿＿＿</span>
-    <span>${rocDate}</span>
+    <span>檢舉日期：${rocDate}</span>
   </div>`;
 
   document.getElementById('sheet').innerHTML = html;
